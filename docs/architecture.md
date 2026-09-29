@@ -8,23 +8,24 @@ storage and to develop hands-on systems administration skills.
 
 ## Hardware
 
-| Component | Current configuration | Why I chose or upgraded it |
-| --- | --- | --- |
-| CPU | To add | More processing capacity for additional applications |
-| Motherboard | To add | Replaced to support the upgraded CPU |
-| RAM | To add | Future upgrade planned |
-| Boot drive | Acer SSD FA100 256GB NVMe | TrueNAS boot device |
-| HDDs | Four WD Red NAS 8TB drives | Expanded capacity after the original pool reached about 75% usage |
-| SSDs | To confirm | Separate, faster storage for applications |
-| GPU | RTX 2080 Ti | Jellyfin transcoding and LocalAI experimentation |
-| Network | Ethernet connection through a managed switch | Wired connectivity for the server |
+| Component | Current configuration |
+| --- | --- |
+| Motherboard | ASUS PRIME B560M-A |
+| CPU | Intel Core i7-10700K |
+| RAM | 32 GB |
+| Boot drive | Acer SSD FA100 256GB NVMe |
+| HDDs | 4 × WD Red WD80EFPX 8TB |
+| Application SSDs | 2 × Crucial BX500 2TB SATA SSDs |
+| Network adapter | Intel I219-V Ethernet |
+| GPU | RTX 2080 Ti |
 
 ## Storage layout
 
-| Pool | Layout | Main purpose |
+| Pool | Configuration | Purpose |
 | --- | --- | --- |
-| Oslo Homelab | Four-drive RAIDZ1 HDD pool | Media, general storage, PC backup files, and VM installation images |
-| SSDapps | Two-drive mirrored SSD pool | Applications, configuration data, and game servers |
+| `Oslo Homelab` | 4 × 8TB HDDs in RAIDZ1 | Media, general storage, PC backup files, and VM installation images |
+| `SSDapps` | 2 × 2TB SSDs in a mirror | Applications, configuration data, and game-server files |
+| `boot-pool` | Acer 256GB NVMe | TrueNAS operating system |
 
 ### HDD pool datasets
 
