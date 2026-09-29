@@ -1,67 +1,91 @@
-# System Architecture
+# Oslo Homelab: System Architecture
 
-## Purpose
+## Project purpose
 
-Oslo Homelab provides shared storage and self-hosted services for me,
-household members, and family. I built it to expand beyond my main PC's
-storage and to develop hands-on systems administration skills.
+Oslo Homelab is a TrueNAS SCALE home server I built to expand storage beyond my main PC and develop hands-on systems administration skills. It provides file storage and self-hosted services for me, household members, and family.
 
-## Hardware
+The project began with a smaller HDD pool and has grown to support PC backups, media streaming, a virtual machine, dedicated game servers, and other self-hosted applications. This document describes the server's hardware, storage, and network architecture and how they have changed over time.
 
-| Component | Current configuration |
+## Current hardware
+
+| Component | Configuration |
 | --- | --- |
+| Case | Rosewill RSV-Z3200U 3U rackmount server chassis |
 | Motherboard | ASUS PRIME B560M-A |
 | CPU | Intel Core i7-10700K |
-| RAM | 32 GB |
+| RAM | 32 GB across two modules |
+| Power supply | EVGA 750 G3 |
 | Boot drive | Acer SSD FA100 256GB NVMe |
 | HDDs | 4 × WD Red WD80EFPX 8TB |
 | Application SSDs | 2 × Crucial BX500 2TB SATA SSDs |
-| Network adapter | Intel I219-V Ethernet |
 | GPU | RTX 2080 Ti |
+| Managed switch | Netgear ProSAFE Plus JGS524E |
+| Wired network adapter | Intel I219-V Ethernet |
 
-## Storage layout
+The server runs TrueNAS SCALE 25.10.7. It is housed in a rackmount chassis and connects to the home network by Ethernet through the managed switch.
 
-| Pool | Configuration | Purpose |
+## Storage architecture
+
+| Pool | Configuration | Primary use |
 | --- | --- | --- |
-| `Oslo Homelab` | 4 × 8TB HDDs in RAIDZ1 | Media, general storage, PC backup files, and VM installation images |
-| `SSDapps` | 2 × 2TB SSDs in a mirror | Applications, configuration data, and game-server files |
 | `boot-pool` | Acer 256GB NVMe | TrueNAS operating system |
+| `Oslo Homelab` | 4 × 8TB HDDs in one RAIDZ1 vdev | Media, general files, PC backups, and VM installation images |
+| `SSDapps` | 2 × 2TB SSDs in one mirror vdev | Applications, configuration data, and game-server files |
+
+I keep large media files and general storage on the HDD pool. I added a separate mirrored SSD pool for application workloads and their associated files.
 
 ### HDD pool datasets
 
-- `media`: Videos, audio, and other files used by Jellyfin.
-- `Storage`: General files and Windows PC backup files.
-- `Virtual_Disks`: Installation images for virtual machines.
-- `SSDapps-backup`: Dataset intended for copies of SSD application data; backup task and restore status to be confirmed.
+| Dataset | Purpose |
+| --- | --- |
+| `media` | Videos, audio, and other files used by Jellyfin |
+| `Storage` | General files and Windows PC backup files |
+| `Virtual_Disks` | Installation images for virtual machines |
+| `SSDapps-backup` | Destination for a one-time copy of SSD application data made while investigating a drive fault |
 
 ### SSD pool datasets
 
-- `application`: Application storage.
-- `config`: Application configuration files.
-- `Game_server`: Dedicated game-server files.
+| Dataset | Purpose |
+| --- | --- |
+| `application` | Application storage |
+| `config` | Application configuration files |
+| `Game_server` | Dedicated game-server files |
 
-## Network overview
+Selected datasets are accessible through SMB shares. Share access and permissions will be covered in the storage documentation.
 
-The server connects by Ethernet to a managed switch on my home network.
-I use a static address for the server and Tailscale for remote access.
-Selected services also use Cloudflare.
+## Network architecture
 
-<!-- To add: a sanitized diagram showing the server, switch, home devices,
-     remote users, and the different remote-access paths. -->
+The server has a static IP address and connects by Ethernet to a Netgear ProSAFE Plus JGS524E managed switch. A network bridge is used by the Kali Linux virtual machine.
 
-## Design decisions
+I use Tailscale for remote access to the server and selected services. I also use Cloudflare for selected application access and DNS. The access path for each service will be covered in separate networking and applications documentation.
 
-- I placed large media and general-purpose files on HDD storage.
-- I added separate SSD storage for applications.
-- I separated workloads into datasets so I can manage their storage and access independently.
-- I expanded HDD capacity as PC backups and other files filled the original pool.
+VLANs are not currently in use on this server connection.
 
-## Changes over time
+## Hardware evolution
 
-1. Built the initial TrueNAS server with a boot drive and four 4TB HDDs.
-2. Expanded the HDD pool to four 8TB drives.
-3. Added separate SSD storage for applications.
-4. Upgraded the CPU and motherboard to support additional workloads.
-5. Added a GPU for Jellyfin and LocalAI use.
+I completed a major hardware upgrade in July 2026 to increase storage capacity and support more applications.
 
-<!-- Check the order above and add dates only if you know them. -->
+| Component | Original build | Current build |
+| --- | --- | --- |
+| Motherboard | ASUS ROG STRIX Z270H GAMING | ASUS PRIME B560M-A |
+| CPU | Intel Core i7-7700K | Intel Core i7-10700K |
+| RAM | 32 GB across four modules | 32 GB across two modules |
+| HDD pool | 4 × WD Red WD40EFRX 4TB | 4 × WD Red WD80EFPX 8TB |
+| Application SSD pool | Not present initially | 2 × Crucial BX500 2TB SSDs in a mirror |
+| Dedicated GPU | None | RTX 2080 Ti |
+
+I upgraded the CPU and motherboard as I planned to run more applications. I expanded the HDD pool after PC backups and other files brought the original pool to approximately 75% usage. I added separate SSD storage for application workloads and added the GPU for media and local AI workloads.
+
+The original four WD Red 4TB HDDs are set aside. I plan to reuse them if I move to a motherboard and case with room for four additional drives; a hot-swappable case is a feature I would like in that future build. I also plan to add two more RAM modules to increase total memory from 32 GB to 64 GB.
+
+## Workloads
+
+Oslo Homelab supports:
+
+- General file storage and selected SMB shares.
+- Jellyfin media storage and streaming.
+- A Kali Linux virtual machine for cybersecurity learning activities.
+- Dedicated game servers that can remain available without running my main PC.
+- Other self-hosted applications for travel planning, fitness tracking, video downloads, network services, storage monitoring, and local AI experimentation.
+
+Application-specific deployment steps and access methods will be documented in separate pages.
